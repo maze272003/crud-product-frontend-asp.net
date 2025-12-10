@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "./App.css"; // Siguraduhing naka-link ito
+import "./App.css"; // Import the styling
 
+// ⚠️ CHANGE THIS TO YOUR ACTUAL BACKEND URL
 const API_BASE_URL = "https://api.frontend.hostcluster.site"; 
 
 function App() {
@@ -11,7 +12,7 @@ function App() {
   const [description, setDescription] = useState("");
   const [imageFile, setImageFile] = useState(null);
   
-  // State para sa Full Screen Image Preview
+  // State for the Image Preview Modal
   const [previewImage, setPreviewImage] = useState(null);
 
   // 1. Fetch Products on Load
@@ -46,6 +47,7 @@ function App() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       
+      // Reset Form
       setName("");
       setPrice("");
       setDescription("");
@@ -61,7 +63,7 @@ function App() {
 
   // 3. Handle Delete
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
+    if (!window.confirm("Are you sure you want to delete this?")) return;
     try {
       await axios.delete(`${API_BASE_URL}/api/products/${id}`);
       fetchProducts();
@@ -123,8 +125,8 @@ function App() {
                   src={`${API_BASE_URL}${product.imagePath}`} 
                   alt={product.name}
                   className="product-thumb"
-                  title="Double click to preview"
-                  // Dito ang logic: Kapag nag double click, ise-set ang URL sa state
+                  title="Double click (or double tap) to preview"
+                  // Logic: Double click sets the state to show the modal
                   onDoubleClick={() => setPreviewImage(`${API_BASE_URL}${product.imagePath}`)}
                 />
               )}
@@ -147,10 +149,13 @@ function App() {
       </div>
 
       {/* --- FULL SCREEN MODAL --- */}
-      {/* Lumalabas lang ito kung may laman ang previewImage */}
+      {/* Renders only if previewImage has a value */}
       {previewImage && (
         <div className="modal-overlay" onClick={() => setPreviewImage(null)}>
-          <img src={previewImage} alt="Preview" className="modal-image" />
+          <div className="modal-content">
+             <img src={previewImage} alt="Preview" className="modal-image" />
+             <p className="modal-instruction">Tap anywhere to close</p>
+          </div>
         </div>
       )}
 

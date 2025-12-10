@@ -1,45 +1,58 @@
 /* App.css */
+
+/* GLOBAL STYLES */
 body {
-  background-color: #1a1a1a;
-  color: white;
+  background-color: #121212; /* Dark Theme */
+  color: #e0e0e0;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 20px;
 }
 
 h1 {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  color: #ffffff;
 }
 
 /* FORM STYLES */
 .form-container {
-  background: #2a2a2a;
+  background: #1e1e1e;
   padding: 20px;
   border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  margin-bottom: 25px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border: 1px solid #333;
 }
 
 .responsive-form {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap; /* Ito ang nagpapababa ng inputs pag masikip */
+  gap: 12px;
+  flex-wrap: wrap; /* Key for responsiveness on tablets */
+  align-items: center;
 }
 
 .input-field {
-  padding: 12px;
-  border-radius: 6px;
+  padding: 12px 15px;
+  border-radius: 8px;
   border: 1px solid #444;
-  background: #333;
+  background: #2c2c2c;
   color: white;
-  flex: 1; /* Hahatiin nila ang space */
-  min-width: 150px; /* Minimum lapad bago bumaba */
+  flex: 1; /* Inputs share space equally */
+  min-width: 140px; /* Forces wrap if too small */
+  font-size: 16px; /* Prevents zoom on iOS inputs */
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: #007bff;
+  background: #333;
 }
 
 .file-input {
@@ -47,6 +60,7 @@ h1 {
   padding: 10px 0;
   flex: 1;
   min-width: 200px;
+  font-size: 14px;
 }
 
 .add-btn {
@@ -54,10 +68,11 @@ h1 {
   background: #007bff;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: bold;
-  flex: 0 0 auto;
+  font-weight: 600;
+  flex: 0 0 auto; /* Button doesn't shrink */
+  transition: background 0.2s;
 }
 
 .add-btn:hover {
@@ -68,17 +83,23 @@ h1 {
 .product-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 15px;
 }
 
 .product-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #2a2a2a;
-  padding: 12px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  background: #1e1e1e;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  border: 1px solid #333;
+  transition: transform 0.2s;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
 }
 
 .product-info {
@@ -86,91 +107,147 @@ h1 {
   align-items: center;
   gap: 15px;
   flex: 1;
+  overflow: hidden; /* Prevents text overflow */
 }
 
 .product-thumb {
-  width: 60px;
-  height: 60px;
+  width: 70px;
+  height: 70px;
   object-fit: cover;
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: #fff;
-  cursor: zoom-in; /* Cursor changes to magnifying glass */
-  transition: transform 0.2s;
+  cursor: zoom-in;
+  border: 2px solid #444;
+  /* Important for mobile double tap handling */
+  touch-action: manipulation; 
 }
 
-.product-thumb:active {
-  transform: scale(0.95);
+.product-details {
+  flex: 1;
 }
 
 .product-details h3 {
-  margin: 0;
+  margin: 0 0 5px 0;
   font-size: 1.1rem;
+  color: #fff;
 }
 
 .product-details p {
-  margin: 4px 0 0;
-  color: #aaa;
-  font-size: 0.9rem;
+  margin: 0;
+  color: #4caf50; /* Green price */
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 .product-desc {
-  font-size: 0.8rem;
+  display: block;
+  font-size: 0.85rem;
   color: #888;
-  margin-top: 2px;
-  display: block; /* Show description */
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds "..." if text is too long */
+  max-width: 200px;
 }
 
 .delete-btn {
-  background: #ff4444;
+  background: #cf3535;
   color: white;
   border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
   margin-left: 10px;
+  font-weight: 600;
+  transition: background 0.2s;
 }
 
-/* IMAGE PREVIEW MODAL (Full Screen) */
+.delete-btn:hover {
+  background: #a02020;
+}
+
+/* IMAGE PREVIEW MODAL (Responsive) */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(0, 0, 0, 0.95);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 2000;
   cursor: zoom-out;
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  max-height: 100%;
 }
 
 .modal-image {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  max-width: 95vw;
+  max-height: 80vh;
+  border-radius: 4px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.8);
   object-fit: contain;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.modal-instruction {
+  color: #888;
+  margin-top: 15px;
+  font-size: 0.9rem;
 }
 
-/* --- MOBILE RESPONSIVE TWEAKS --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* --- 📱 MOBILE RESPONSIVE MEDIA QUERY --- */
 @media (max-width: 600px) {
+  .container {
+    padding: 10px;
+  }
+
+  /* Stack the form vertically */
   .responsive-form {
-    flex-direction: column; /* Gawing patayo ang form sa cellphone */
+    flex-direction: column; 
+    align-items: stretch; /* Stretch inputs to full width */
+    gap: 15px;
   }
   
   .input-field, .add-btn, .file-input {
-    width: 100%; /* Full width lahat sa mobile */
+    width: 100%; 
     min-width: auto;
+    box-sizing: border-box; /* Ensures padding doesn't overflow width */
+  }
+
+  .add-btn {
+    padding: 15px; /* Bigger touch target */
+    font-size: 1.1rem;
+  }
+
+  /* Adjust product card layout */
+  .product-card {
+    padding: 10px;
+  }
+
+  .product-thumb {
+    width: 60px;
+    height: 60px;
   }
 
   .product-details h3 {
     font-size: 1rem;
+  }
+  
+  .product-desc {
+    max-width: 150px; /* Smaller truncation width */
   }
 }
