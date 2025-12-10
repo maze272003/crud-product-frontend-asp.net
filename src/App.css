@@ -1,42 +1,176 @@
-#root {
-  max-width: 1280px;
+/* App.css */
+body {
+  background-color: #1a1a1a;
+  color: white;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.container {
+  max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 20px;
+}
+
+h1 {
   text-align: center;
+  margin-bottom: 20px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* FORM STYLES */
+.form-container {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.3);
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.responsive-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap; /* Ito ang nagpapababa ng inputs pag masikip */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.input-field {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #333;
+  color: white;
+  flex: 1; /* Hahatiin nila ang space */
+  min-width: 150px; /* Minimum lapad bago bumaba */
 }
 
-.card {
-  padding: 2em;
+.file-input {
+  color: #aaa;
+  padding: 10px 0;
+  flex: 1;
+  min-width: 200px;
 }
 
-.read-the-docs {
+.add-btn {
+  padding: 12px 24px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  flex: 0 0 auto;
+}
+
+.add-btn:hover {
+  background: #0056b3;
+}
+
+/* PRODUCT LIST STYLES */
+.product-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.product-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #2a2a2a;
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.product-thumb {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 6px;
+  background-color: #fff;
+  cursor: zoom-in; /* Cursor changes to magnifying glass */
+  transition: transform 0.2s;
+}
+
+.product-thumb:active {
+  transform: scale(0.95);
+}
+
+.product-details h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.product-details p {
+  margin: 4px 0 0;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.product-desc {
+  font-size: 0.8rem;
   color: #888;
+  margin-top: 2px;
+  display: block; /* Show description */
+}
+
+.delete-btn {
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+/* IMAGE PREVIEW MODAL (Full Screen) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  cursor: zoom-out;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-image {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  object-fit: contain;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* --- MOBILE RESPONSIVE TWEAKS --- */
+@media (max-width: 600px) {
+  .responsive-form {
+    flex-direction: column; /* Gawing patayo ang form sa cellphone */
+  }
+  
+  .input-field, .add-btn, .file-input {
+    width: 100%; /* Full width lahat sa mobile */
+    min-width: auto;
+  }
+
+  .product-details h3 {
+    font-size: 1rem;
+  }
 }
