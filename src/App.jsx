@@ -6,7 +6,7 @@ import "./App.css";
 // ⚠️ IMPORTANT: REPLACE THIS WITH YOUR ASP.NET BACKEND PORT
 // Check your dotnet terminal for "Now listening on..."
 // ---------------------------------------------------------
-const API_BASE_URL = "http://localhost:5110"; 
+const API_BASE_URL = "https://api.frontend.hostcluster.site"; 
 
 function App() {
   const [products, setProducts] = useState([]);
