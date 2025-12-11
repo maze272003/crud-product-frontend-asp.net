@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import * as signalR from "@microsoft/signalr"; // 💡 NEW: Import the SignalR library
 import "./App.css";
 
-// ⚠️ IBINALIK SA HARDCODED URL
+// Base URLs
 const API_BASE_URL = "https://api.frontend.hostcluster.site"; 
-const CACHE_KEY = "storeManagerProductsCache"; // Key to store products in localStorage
+// ⚠️ SIGNALR URL: Dapat tugma ito sa 'app.MapHub' endpoint sa Program.cs
+const WS_URL_SIGNALR = "https://api.frontend.hostcluster.site/ws/products"; 
+
+const CACHE_KEY = "storeManagerProductsCache"; 
 
 function App() {
-  // Initialize 'products' state by checking localStorage first for faster initial load
+  // 1. Initialize 'products' state by checking localStorage first
   const [products, setProducts] = useState(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
-      // If cache exists, parse and return it; otherwise, return an empty array
       return cached ? JSON.parse(cached) : [];
     } catch (e) {
       console.error("Error reading from local storage:", e);
@@ -33,35 +36,60 @@ function App() {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/products`);
       
-      // Update state with the freshest data
       setProducts(response.data);
-      
-      // Update localStorage (Cache Update)
       localStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
 
     } catch (error) {
       console.error("Error fetching products:", error);
-      // Show warning if network fetch failed, but cached data is available
       if (products.length > 0) {
            console.warn("Could not fetch latest data. Showing cached data.");
       }
     }
   };
   
-  // 1. Fetch Products on Component Mount (Initial Load)
+  // 2. LIFECYCLE HOOKS
+
+  // A. Initial Data Fetch
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // 2. Handle Add Product (Requires re-fetch to update the cache)
+  // B. SignalR Setup for Realtime Updates 💡 NEW HOOK
+  useEffect(() => {
+    const connection = new signalR.HubConnectionBuilder()
+        // Gamitin ang tamang URL at i-configure ang CORS
+        .withUrl(WS_URL_SIGNALR, { withCredentials: true }) 
+        .withAutomaticReconnect() // Awtomatikong magre-reconnect kung maputol
+        .build();
+    
+    // Simulan ang connection
+    connection.start()
+        .then(() => console.log("SignalR Connected! Realtime updates enabled."))
+        .catch(err => console.error("SignalR Connection Error: ", err));
+
+    // Mag-subscribe sa event na ipinadala ng ASP.NET Controller
+    // Tandaan: Ang pangalan ng method ay "ReceiveUpdate"
+    connection.on("ReceiveUpdate", (eventType) => {
+        console.log(`Realtime Event Received: ${eventType}. Refreshing products.`);
+        // Kapag may natanggap na event (product_added, product_deleted, etc.), 
+        // i-re-fetch ang listahan para maipakita ang pinakabagong data
+        fetchProducts(); 
+    });
+
+    // Cleanup function: Tiyakin na nag-stop ang connection kapag umalis sa page
+    return () => {
+        connection.stop();
+        console.log("SignalR connection closed.");
+    };
+  }, []); // [] ensures this runs only once on mount
+
+  // 3. Handle Add Product
   const handleAddProduct = async (e) => {
     e.preventDefault();
-
     const formData = new FormData();
     formData.append("name", name);
     formData.append("price", price);
     formData.append("description", description);
-    
     if (imageFile) {
       formData.append("imageFile", imageFile);
     }
@@ -76,10 +104,10 @@ function App() {
       setPrice("");
       setDescription("");
       setImageFile(null);
-      // Reset file input element visually
       document.getElementById("fileInput").value = ""; 
       
-      // Re-fetch the product list and update the cache
+      // Kahit mag-trigger ang backend ng SignalR, tinatawag pa rin natin ito
+      // para maging instant ang update sa lokal na user.
       fetchProducts(); 
     } catch (error) {
       console.error("Error adding product:", error);
@@ -87,13 +115,12 @@ function App() {
     }
   };
 
-  // 3. Handle Delete (Requires re-fetch to update the cache)
+  // 4. Handle Delete
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this?")) return;
     try {
       await axios.delete(`${API_BASE_URL}/api/products/${id}`);
       
-      // Re-fetch the product list and update the cache
       fetchProducts();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -154,7 +181,6 @@ function App() {
                   alt={product.name}
                   className="product-thumb"
                   title="Double click (or double tap) to preview"
-                  // Logic: Double click sets the state to show the modal
                   onDoubleClick={() => setPreviewImage(`${API_BASE_URL}${product.imagePath}`)}
                 />
               )}
@@ -177,7 +203,6 @@ function App() {
       </div>
 
       {/* --- FULL SCREEN MODAL --- */}
-      {/* Renders only if previewImage has a value */}
       {previewImage && (
         <div className="modal-overlay" onClick={() => setPreviewImage(null)}>
           <div className="modal-content">
