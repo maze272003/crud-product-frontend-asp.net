@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import * as signalR from "@microsoft/signalr"; // 💡 NEW: Import the SignalR library
+import * as signalR from "@microsoft/signalr";
+import { ToastContainer, toast } from 'react-toastify'; // Import Toast components
+import 'react-toastify/dist/ReactToastify.css'; // Import Toast CSS
 import "./App.css";
 
 // Base URLs
 const API_BASE_URL = "https://api.frontend.hostcluster.site"; 
-// ⚠️ SIGNALR URL: Dapat tugma ito sa 'app.MapHub' endpoint sa Program.cs
+// SIGNALR URL: Dapat tugma sa 'app.MapHub' sa iyong ASP.NET Program.cs
 const WS_URL_SIGNALR = "https://api.frontend.hostcluster.site/ws/products"; 
 
 const CACHE_KEY = "storeManagerProductsCache"; 
 
 function App() {
-  // 1. Initialize 'products' state by checking localStorage first
+  // 1. Initialize 'products' state by checking localStorage first (Caching)
   const [products, setProducts] = useState(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
@@ -54,34 +56,45 @@ function App() {
     fetchProducts();
   }, []);
 
-  // B. SignalR Setup for Realtime Updates 💡 NEW HOOK
+  // B. SignalR Setup for Realtime Updates
   useEffect(() => {
     const connection = new signalR.HubConnectionBuilder()
-        // Gamitin ang tamang URL at i-configure ang CORS
+        // Nagpapadala ng cookies/credentials para sa CORS Policy
         .withUrl(WS_URL_SIGNALR, { withCredentials: true }) 
-        .withAutomaticReconnect() // Awtomatikong magre-reconnect kung maputol
+        .withAutomaticReconnect()
         .build();
     
-    // Simulan ang connection
     connection.start()
         .then(() => console.log("SignalR Connected! Realtime updates enabled."))
         .catch(err => console.error("SignalR Connection Error: ", err));
 
     // Mag-subscribe sa event na ipinadala ng ASP.NET Controller
-    // Tandaan: Ang pangalan ng method ay "ReceiveUpdate"
-    connection.on("ReceiveUpdate", (eventType) => {
-        console.log(`Realtime Event Received: ${eventType}. Refreshing products.`);
-        // Kapag may natanggap na event (product_added, product_deleted, etc.), 
-        // i-re-fetch ang listahan para maipakita ang pinakabagong data
+    // Ang method ay "ReceiveUpdate" na tumatanggap ng 3 arguments: type, name, at ip
+    connection.on("ReceiveUpdate", (eventType, productName, clientIp) => {
+        console.log(`Realtime Event Received: ${eventType}. IP: ${clientIp}`);
+        
+        // I-re-fetch ang listahan para sa data update
         fetchProducts(); 
+
+        // Ipakita ang TOAST Notification
+        let message = "";
+        if (eventType === 'product_added') {
+            message = `🟢 ADDED: '${productName}' by Device IP: ${clientIp}`;
+            toast.success(message, { position: "top-right" });
+        } else if (eventType === 'product_deleted') {
+            message = `🔴 DELETED: '${productName}' by Device IP: ${clientIp}`;
+            toast.error(message, { position: "top-right" });
+        } else if (eventType === 'product_updated') {
+             message = `🟡 UPDATED: '${productName}' by Device IP: ${clientIp}`;
+             toast.info(message, { position: "top-right" });
+        }
     });
 
-    // Cleanup function: Tiyakin na nag-stop ang connection kapag umalis sa page
+    // Cleanup function
     return () => {
         connection.stop();
-        console.log("SignalR connection closed.");
     };
-  }, []); // [] ensures this runs only once on mount
+  }, []); 
 
   // 3. Handle Add Product
   const handleAddProduct = async (e) => {
@@ -106,8 +119,7 @@ function App() {
       setImageFile(null);
       document.getElementById("fileInput").value = ""; 
       
-      // Kahit mag-trigger ang backend ng SignalR, tinatawag pa rin natin ito
-      // para maging instant ang update sa lokal na user.
+      // Trigger local update (kahit mag-trigger ang SignalR)
       fetchProducts(); 
     } catch (error) {
       console.error("Error adding product:", error);
@@ -121,6 +133,7 @@ function App() {
     try {
       await axios.delete(`${API_BASE_URL}/api/products/${id}`);
       
+      // Trigger local update
       fetchProducts();
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -130,6 +143,9 @@ function App() {
   return (
     <div className="container">
       <h1>Simple Store Manager</h1>
+
+      {/* 💡 Toast Container - Dito lalabas ang mga realtime notification */}
+      <ToastContainer autoClose={5000} /> 
 
       {/* --- INPUT FORM --- */}
       <div className="form-container">
